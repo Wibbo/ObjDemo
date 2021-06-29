@@ -1,0 +1,6 @@
+{
+    "python.pythonPath": "/Users/matthewweaver/opt/anaconda3/envs/vision/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": false,
+}
