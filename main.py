@@ -15,7 +15,7 @@ app.define_page("Predicting house prices", house_prices.build_page)
 app.define_page("Face detection", face_detection.build_page)
 
 
-# The main app
+# The main application.
 app.build_page()
 
 
