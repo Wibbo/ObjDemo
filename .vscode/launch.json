@@ -8,7 +8,7 @@
             "name": "Streamlit",
             "type": "python",
             "request": "launch",
-            "program": "/Users/matthewweaver/opt/anaconda3/envs/vision/bin/streamlit",
+            "program": "/Users/matthewweaver/opt/anaconda3/envs/streamlit/bin/streamlit",
             "args": [
                 "run",
                 "${file}"

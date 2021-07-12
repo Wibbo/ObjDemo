@@ -1,6 +1,5 @@
 import streamlit as st
 
-
 class AppPage:
 
     def __init__(self) -> None:

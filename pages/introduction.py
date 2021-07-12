@@ -17,4 +17,9 @@ def build_page() -> None:
 
     st.markdown('## See also')
     st.markdown('[The Objectivity web site](https://www.objectivity.co.uk)')
+    st.markdown('[The need for a data strategy infographic](https://tinyurl.com/ydob6etr)')
+    st.markdown('[The need for a data strategy white paper](https://tinyurl.com/yhggsyht)')    
+    st.markdown('[Data in retail on Teams](https://tinyurl.com/yjvqu7xb)') 
+
+
 
