@@ -4,21 +4,47 @@ import numpy as np
 import seaborn as sns
 from matplotlib import pyplot as plt
 import altair as alt
+from datetime import datetime
 
 
-def build_page() -> None:
+@st.cache
+def pre_process_data(data_frame):
+    """Prepares the dataset as described on the main page.
+    Args:
+        The dataframe to be processed.
+    Returns:
+        The processed dataframe.
     """
-    Defines a page in the streamlit application.
-    :return: None
-    """
-    sns.set_palette('mako')
-    st.markdown("## Looking at retail data")
+    data_frame = data_frame[data_frame.Quantity > 0]
+    data_frame = data_frame[data_frame.UnitPrice > 0]
+    data_frame = data_frame[~data_frame.StockCode.isin(['M', 'DOT', 'BANK CHARGES', 'D', 'CRUK', 'S', 'PADS', 'POST', 'B', 'C2', 'AMAZONFEE'])]
+    data_frame = data_frame.dropna(how='any', subset=['CustomerID'])
+    return data_frame
 
+
+@st.cache
+def import_sales_data():
+    """Loads and initialises the sales data from a csv file.
+    Returns:
+        [type]: A dataframe containing the sales data.
+    """
     df_sales = pd.read_csv('./assets/retail-records.csv', dtype={'CustomerID': str})
     df_sales['InvoiceDate'] = pd.to_datetime(df_sales['InvoiceDate'])
     df_sales['Hour'] = df_sales['InvoiceDate'].dt.hour   
     df_sales.set_index('InvoiceDate', inplace=True)
     df_sales.index = pd.to_datetime(df_sales.index)
+    return df_sales  
+
+
+
+def build_page() -> None:
+    """
+    Definition for the retail sales page.
+    :return: None
+    """
+    st.markdown("## Looking at retail data")
+    
+    df_sales = import_sales_data()
     df_months = df_sales.resample('M').sum()
     
     df_rows = df_sales.shape[0]
@@ -57,7 +83,6 @@ def build_page() -> None:
             The steps taken here depend on the nature of the data and the insights
             you are trying to report.
             For this dataset, the following steps are taken:""")       
-#        st.markdown('###')
         st.markdown(f"""
                     - Remove all records that do not have a CustomerID.
                     - Remove all records where the quantity is zero or less.
@@ -76,12 +101,8 @@ def build_page() -> None:
                         - AMAZONFEE
                     - Convert InvoiceDate to a datetime variable and separate days from hours. 
                         """)
-
-
-        df_sales = df_sales[df_sales.Quantity > 0]
-        df_sales = df_sales[df_sales.UnitPrice > 0]
-        df_sales = df_sales[~df_sales.StockCode.isin(['M', 'DOT', 'BANK CHARGES', 'D', 'CRUK', 'S', 'PADS', 'POST', 'B', 'C2', 'AMAZONFEE'])]
-        df_sales = df_sales.dropna(how='any', subset=['CustomerID'])
+        
+        df_sales = pre_process_data(df_sales)
         rows_clean = df_sales.shape[0]
         
         st.markdown(f'After pre-processing, a total of {df_rows - rows_clean:,} records have been removed. There are now {rows_clean:,} remaining records.')   
@@ -95,7 +116,7 @@ def build_page() -> None:
         st.markdown('Clicking on a column will sort the data by that column.')
         st.write(df_sales.head(records))
 
-        st.markdown('### Dataset column summaries')
+        st.markdown('### Summary of the sales dataset')
         st.markdown(f'- There are {len(df_sales.StockCode.value_counts()):,} different products.')
         st.markdown(f'- The sales were made to {len(df_sales.CustomerID.value_counts()):,} unique customers.')
         st.markdown(f'- In total there are {len(df_sales.InvoiceNo.value_counts()):,} separate invoices.')
@@ -111,8 +132,8 @@ def build_page() -> None:
         sns.histplot(data=df_sales, x=df_sales['Hour'], binwidth=1, bins=24)
         ax1.set_title('Product sale times', fontsize=16)
         ax1.set(xlabel='Hour of sale', ylabel='Number of sales')
-        mean = df_sales.Hour.mean()
-        ax1.axvline(mean, color='r', linestyle='--')
+        median = df_sales.Hour.median()
+        ax1.axvline(median, color='r', linestyle='--')      
         st.pyplot(f1)
 
         f2, ax2 = plt.subplots(1,2, figsize = (15,8))
@@ -121,7 +142,6 @@ def build_page() -> None:
         c_Quantity = sns.barplot(x=df_months.index.values, y='Quantity', data=df_months, ax=ax2[0])       
         c_Price = sns.barplot(x=df_months.index.values, y='UnitPrice', data=df_months, ax=ax2[1])   
         c_Quantity.set_xticklabels(c_Quantity.get_xticklabels(), rotation=45)
-
         
         x_dates = df_months.index.strftime('%b %Y')
         c_Price.set_xticklabels(labels=x_dates, rotation=45, ha='right')
@@ -129,4 +149,3 @@ def build_page() -> None:
 
         st.pyplot(f2)
 
-    
